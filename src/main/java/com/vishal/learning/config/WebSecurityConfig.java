@@ -1,6 +1,7 @@
 package com.vishal.learning.config;
 
 import com.vishal.learning.filter.JwtAuthFilter;
+import com.vishal.learning.filter.LoggingFilter;
 import com.vishal.learning.services.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -14,6 +15,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 
 @Configuration
@@ -23,10 +25,15 @@ public class WebSecurityConfig {
     @Autowired
     JwtAuthFilter jwtAuthFilter;
 
+    @Autowired
+    LoggingFilter loggingFilter;
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
-        httpSecurity.
-                authorizeHttpRequests(auth -> auth
+        httpSecurity
+                .addFilterBefore(loggingFilter, WebAsyncManagerIntegrationFilter.class)
+
+                .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**").permitAll()
                         .anyRequest().authenticated())
                 .csrf(csrfConfig -> csrfConfig.disable())
